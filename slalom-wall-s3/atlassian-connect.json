@@ -1,0 +1,30 @@
+{
+  "key": "my-add-on",
+  "name": "Slalom Wall",
+  "description": "My very first HipChat add-on",
+  "vendor": {
+    "name": "Tiffany Huang",
+    "url": "https://www.hipchat.com"
+  },
+  "links": {
+    "self": "http://slalom-wall.s3-website-us-east-1.amazonaws.com/atlassian-connect.json",
+    "homepage": "http://slalom-wall.s3-website-us-east-1.amazonaws.com"
+  },
+  "capabilities": {
+    "hipchatApiConsumer": {
+      "scopes": [
+        "send_notification",
+        "view_room"
+      ]
+    }, 
+    "installable": {
+      "callbackUrl": "https://utcjpbrhbj.execute-api.us-east-1.amazonaws.com/dev/slalom-wall/installed"
+    },
+    "webhook": {
+      "url": "http://slalom-wall.s3-website-us-east-1.amazonaws.com/image_webhook",
+      "event": "room_file_upload",
+      "name": "fileUpload",
+      "authentication": "none"
+    }
+  }
+}
