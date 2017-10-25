@@ -90,7 +90,13 @@ functions:
 #    Define function environment variables here
 #    environment:
 #      variable2: value2
-
+  fileUpload:
+    handler: fileUpload.fileReceived
+    events:
+      - http:
+          path: slalom-wall/fileUploaded
+          method: post
+          cors: true
 # you can add CloudFormation resource templates here
 #resources:
 #  Resources:

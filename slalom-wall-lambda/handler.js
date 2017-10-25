@@ -17,9 +17,8 @@ module.exports.installed = (event, context, callback) => {
 
   var installation = JSON.parse(event.body);
   var capabilitiesUrl = installation['capabilitiesUrl'];
-  console.log(installation);
-  console.log(capabilitiesUrl);
 
+  // Get token url and api url
   request.get(capabilitiesUrl, function (err, res, body) {
     var capabilities = JSON.parse(body);
 
@@ -28,8 +27,8 @@ module.exports.installed = (event, context, callback) => {
 
     // Save the API endpoint URL along with the client credentials
     installation.apiUrl = capabilities.capabilities.hipchatApiProvider.url;
-    console.log(installation);
 
+    // Request for access token
     var params = {
       uri: installation.tokenUrl,
       auth: {
@@ -41,28 +40,30 @@ module.exports.installed = (event, context, callback) => {
       }
     };
 
+    // Post request for access token
     request.post(params, function (err, res, body) {
       var accessToken = JSON.parse(body);
       console.log("accessToken: " + accessToken.access_token);
       const roomId = installation.roomId;
       const notificationUrl = installation.apiUrl + "/room/" + roomId + "/notification";
+      
+      // Post request to send hipchat installation message
       request({
         method: 'POST',
         url: notificationUrl,
         qs: {auth_token: accessToken.access_token},
-        body: {message: 'Slalom Wall add-on installed'},
+        body: {message: 'Slalom Wall add-on installed!'},
         json: true
       }, function(err, res, body){
-        if (err || (body && body.error)) {
-          console.log(err || body.error.message);
-          response.statusCode = 401;
-        }
+          var error = null;
+          if (err || (body && body.error)) {
+            error = new Error(err || body.error.message)
+            console.log(error);
+          }
+          callback(error, response);       
       });
     });
   });
-    
-  callback(null, response);
-
   // Use this code if you don't use the http event with the LAMBDA-PROXY integration
   // callback(null, { message: 'Go Serverless v1.0! Your function executed successfully!', event });
 };

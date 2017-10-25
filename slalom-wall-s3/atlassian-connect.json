@@ -21,7 +21,7 @@
       "callbackUrl": "https://utcjpbrhbj.execute-api.us-east-1.amazonaws.com/dev/slalom-wall/installed"
     },
     "webhook": {
-      "url": "http://slalom-wall.s3-website-us-east-1.amazonaws.com/image_webhook",
+      "url": "https://utcjpbrhbj.execute-api.us-east-1.amazonaws.com/dev/slalom-wall/fileUploaded",
       "event": "room_file_upload",
       "name": "fileUpload",
       "authentication": "none"

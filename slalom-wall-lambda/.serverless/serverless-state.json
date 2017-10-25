@@ -25,6 +25,12 @@
               "LogGroupName": "/aws/lambda/slalom-wall-dev-hello"
             }
           },
+          "FileUploadLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/slalom-wall-dev-fileUpload"
+            }
+          },
           "IamRoleLambdaExecution": {
             "Type": "AWS::IAM::Role",
             "Properties": {
@@ -67,6 +73,9 @@
                         "Resource": [
                           {
                             "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/slalom-wall-dev-hello:*"
+                          },
+                          {
+                            "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/slalom-wall-dev-fileUpload:*"
                           }
                         ]
                       },
@@ -78,6 +87,9 @@
                         "Resource": [
                           {
                             "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/slalom-wall-dev-hello:*:*"
+                          },
+                          {
+                            "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/slalom-wall-dev-fileUpload:*:*"
                           }
                         ]
                       }
@@ -106,7 +118,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/slalom-wall/dev/1508741071651-2017-10-23T06:44:31.651Z/slalom-wall.zip"
+                "S3Key": "serverless/slalom-wall/dev/1508776085249-2017-10-23T16:28:05.249Z/slalom-wall.zip"
               },
               "FunctionName": "slalom-wall-dev-hello",
               "Handler": "handler.installed",
@@ -125,14 +137,50 @@
               "IamRoleLambdaExecution"
             ]
           },
-          "HelloLambdaVersionW4UBq63pvYR1N8D2EAr491nawOwV8uN0ftMnyG1JdQ": {
+          "HelloLambdaVersion6mdXu0JDg9mhDs7wrjgR552PMzkRBxKeNOKqS5u2BRg": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "HelloLambdaFunction"
               },
-              "CodeSha256": "W4UBq63pvYR1N8D2EAr491nawOwV8uN0ftMnyG1/JdQ="
+              "CodeSha256": "6mdXu0JDg9mhDs7wrjgR552PMzkRBxKeNOKqS5u2BRg="
+            }
+          },
+          "FileUploadLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/slalom-wall/dev/1508776085249-2017-10-23T16:28:05.249Z/slalom-wall.zip"
+              },
+              "FunctionName": "slalom-wall-dev-fileUpload",
+              "Handler": "fileUpload.fileReceived",
+              "MemorySize": 1024,
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              },
+              "Runtime": "nodejs6.10",
+              "Timeout": 6
+            },
+            "DependsOn": [
+              "FileUploadLogGroup",
+              "IamRoleLambdaExecution"
+            ]
+          },
+          "FileUploadLambdaVersion6mdXu0JDg9mhDs7wrjgR552PMzkRBxKeNOKqS5u2BRg": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "FileUploadLambdaFunction"
+              },
+              "CodeSha256": "6mdXu0JDg9mhDs7wrjgR552PMzkRBxKeNOKqS5u2BRg="
             }
           },
           "ApiGatewayRestApi": {
@@ -163,6 +211,18 @@
                 "Ref": "ApiGatewayResourceSlalomDashwall"
               },
               "PathPart": "installed",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceSlalomDashwallFileuploaded": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Ref": "ApiGatewayResourceSlalomDashwall"
+              },
+              "PathPart": "fileUploaded",
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
               }
@@ -214,6 +274,52 @@
               }
             }
           },
+          "ApiGatewayMethodSlalomDashwallFileuploadedOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true,
+                    "method.response.header.Access-Control-Allow-Credentials": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'",
+                      "method.response.header.Access-Control-Allow-Credentials": "'false'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": ""
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceSlalomDashwallFileuploaded"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
           "ApiGatewayMethodSlalomDashwallInstalledPost": {
             "Type": "AWS::ApiGateway::Method",
             "Properties": {
@@ -252,7 +358,45 @@
               "MethodResponses": []
             }
           },
-          "ApiGatewayDeployment1508741071669": {
+          "ApiGatewayMethodSlalomDashwallFileuploadedPost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "POST",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceSlalomDashwallFileuploaded"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "FileUploadLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            }
+          },
+          "ApiGatewayDeployment1508776085275": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -261,7 +405,8 @@
               "StageName": "dev"
             },
             "DependsOn": [
-              "ApiGatewayMethodSlalomDashwallInstalledPost"
+              "ApiGatewayMethodSlalomDashwallInstalledPost",
+              "ApiGatewayMethodSlalomDashwallFileuploadedPost"
             ]
           },
           "HelloLambdaPermissionApiGateway": {
@@ -270,6 +415,39 @@
               "FunctionName": {
                 "Fn::GetAtt": [
                   "HelloLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "FileUploadLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "FileUploadLambdaFunction",
                   "Arn"
                 ]
               },
@@ -307,7 +485,13 @@
           "HelloLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "HelloLambdaVersionW4UBq63pvYR1N8D2EAr491nawOwV8uN0ftMnyG1JdQ"
+              "Ref": "HelloLambdaVersion6mdXu0JDg9mhDs7wrjgR552PMzkRBxKeNOKqS5u2BRg"
+            }
+          },
+          "FileUploadLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "FileUploadLambdaVersion6mdXu0JDg9mhDs7wrjgR552PMzkRBxKeNOKqS5u2BRg"
             }
           },
           "ServiceEndpoint": {
@@ -379,12 +563,46 @@
         "name": "slalom-wall-dev-hello",
         "package": {},
         "vpc": {}
+      },
+      "fileUpload": {
+        "handler": "fileUpload.fileReceived",
+        "events": [
+          {
+            "http": {
+              "path": "slalom-wall/fileUploaded",
+              "method": "post",
+              "cors": {
+                "origins": [
+                  "*"
+                ],
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "POST"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "slalom-wall-dev-fileUpload",
+        "package": {},
+        "vpc": {}
       }
     },
-    "artifact": "/Users/Tiffanie/Projects/mockbook/wall/slalom-wall-lambda/.serverless/slalom-wall.zip"
+    "artifact": "/Users/Tiffanie/Projects/mockbook/wall/slalom-wall/slalom-wall-lambda/.serverless/slalom-wall.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/slalom-wall/dev/1508741071651-2017-10-23T06:44:31.651Z",
+    "artifactDirectoryName": "serverless/slalom-wall/dev/1508776085249-2017-10-23T16:28:05.249Z",
     "artifact": "slalom-wall.zip"
   }
 }
