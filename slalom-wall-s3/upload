@@ -1,1 +1,1 @@
-aws s3 cp . s3://slalom-wall/ --recursive --acl public-read
+aws s3 sync ./ s3://slalom-wall --acl public-read
